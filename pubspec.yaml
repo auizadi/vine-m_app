@@ -37,6 +37,9 @@ dependencies:
   ultralytics_yolo: ^0.0.7
   image_picker: ^1.1.2
   lucide_icons: ^0.257.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
