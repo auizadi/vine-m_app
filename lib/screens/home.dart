@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const CameraInferenceScreen(),
+                    builder: (_) => const CameraDetectionScreen(),
                   ),
                 );
               },

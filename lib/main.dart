@@ -1,15 +1,17 @@
-// example/lib/main.dart
-// import 'dart:typed_data';
 import 'package:flutter/material.dart';
-// import 'package:ultralytics_yolo/yolo.dart';
-// YOLOResult is now imported through yolo.dart
-// import 'package:ultralytics_yolo/yolo_view.dart';
-// import 'package:image_picker/image_picker.dart';
+// import 'package:hive/hive.dart';
+// import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 import 'screens/home.dart';
 import 'screens/history.dart';
 import 'screens/guide.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'models/diseases_model.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(DetectionHistoryAdapter());
+  await Hive.openBox<DetectionHistory>('detectionResults');
   runApp(const GrapeMobileApp());
 }
 
@@ -26,14 +28,22 @@ class GrapeMobileApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState(){
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> _pages = [HomeScreen(), HistoryScreen(), GuideScreen()];
 
@@ -57,6 +67,8 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+
+  
 }
 
 

@@ -1,200 +1,176 @@
+// import 'package:ultralytics_yolo/yolo_view.dart';
 import 'package:flutter/material.dart';
-import 'package:ultralytics_yolo/yolo.dart';
-import 'package:ultralytics_yolo/yolo_view.dart';
+import 'package:ultralytics_yolo/ultralytics_yolo.dart';
+import 'dart:developer' as developer;
+import 'package:yolo_grapevine/services/prevention_helper.dart';
 
-class CameraInferenceScreen extends StatefulWidget {
-  const CameraInferenceScreen({super.key});
+// For even better practice:
+class CameraDetectionScreen extends StatefulWidget {
+  const CameraDetectionScreen({super.key});
 
   @override
-  State<CameraInferenceScreen> createState() => _CameraInferenceScreenState();
+  State<CameraDetectionScreen> createState() => _CameraDetectionScreenState();
 }
 
-class _CameraInferenceScreenState extends State<CameraInferenceScreen> {
-  int _detectionCount = 0;
-  double _confidenceThreshold = 0.7;
-  double _iouThreshold = 0.5;
-  String _lastDetection = "";
-
-  // Method 1: Create a controller to interact with the YoloView
-  final _yoloController = YoloViewController();
-
-  // Method 2: Create a GlobalKey to access the YoloView directly
-  final _yoloViewKey = GlobalKey<YoloViewState>();
-
-  // Flag to toggle between using controller and direct key access
-  // This is just for demonstration - normally you'd pick one approach
-  bool _useController = true;
-
-  void _onDetectionResults(List<YOLOResult> results) {
-    if (!mounted) return;
-
-    debugPrint('_onDetectionResults called with ${results.length} results');
-
-    // Print details of the first few detections for debugging
-    for (var i = 0; i < results.length && i < 3; i++) {
-      final r = results[i];
-      debugPrint(
-        '  Detection $i: ${r.className} (${(r.confidence * 100).toStringAsFixed(1)}%) at ${r.boundingBox}',
-      );
-    }
-
-    // Make sure to actually update the state
-    setState(() {
-      _detectionCount = results.length;
-      if (results.isNotEmpty) {
-        // Get detection with highest confidence
-        final topDetection = results.reduce(
-          (a, b) => a.confidence > b.confidence ? a : b,
-        );
-        _lastDetection =
-            "${topDetection.className} (${(topDetection.confidence * 100).toStringAsFixed(1)}%)";
-
-        debugPrint(
-          'Updated state: count=$_detectionCount, top=$_lastDetection',
-        );
-      } else {
-        _lastDetection = "None";
-        debugPrint('Updated state: No detections');
-      }
-    });
-  }
+class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
+  late YOLOViewController controller;
+  List<YOLOResult> currentResults = [];
+  YOLOResult? selectedResult;
+  bool isSheetVisible = false;
+  DateTime? lastDetectionTime;
 
   @override
   void initState() {
     super.initState();
+    controller = YOLOViewController();
+  }
 
-    // Set initial thresholds via controller
-    // We do this in a post-frame callback to ensure the view is initialized
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_useController) {
-        _yoloController.setThresholds(
-          confidenceThreshold: _confidenceThreshold,
-          iouThreshold: _iouThreshold,
-        );
-      } else {
-        _yoloViewKey.currentState?.setThresholds(
-          confidenceThreshold: _confidenceThreshold,
-          iouThreshold: _iouThreshold,
-        );
-      }
-    });
+  void _handleDetectionResult(YOLOResult result) {
+    final now = DateTime.now();
+
+    // jika tidak sedang tampil atau hasil baru (class berbeda) atau jeda > 2 detik
+    if (!isSheetVisible ||
+    selectedResult?.className != result.className ||
+    (lastDetectionTime != null && 
+    now.difference(lastDetectionTime!).inSeconds > 2)) {
+      setState(() {
+        selectedResult = result;
+        isSheetVisible = true;
+        lastDetectionTime = now;
+      });
+      
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Camera Inference'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+        title: const Text(
+          'Camera Detection',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
         ),
-        actions: [
-          // Toggle button to switch between controller and direct access methods
-          // This is just for demonstration purposes
-          IconButton(
-            icon: Icon(_useController ? Icons.gamepad : Icons.key),
-            tooltip:
-                _useController ? 'Using Controller' : 'Using Direct Access',
-            onPressed: () {
+        backgroundColor: Colors.purple,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Stack(
+        children: [
+          // Camera view with YOLO processing
+          YOLOView(
+            modelPath: 'model_int8',
+            task: YOLOTask.detect,
+            controller: controller,
+            onResult: (results) {
+              if (results.isNotEmpty) {
+                _handleDetectionResult(results.first);
+              }
               setState(() {
-                _useController = !_useController;
+                currentResults = results;
               });
             },
+            onPerformanceMetrics: (metrics) {
+              developer.log(
+                'Performance Metrics',
+                name: 'CameraDetection',
+                error: {
+                  'FPS': metrics.fps.toString(),
+                  'ProcessingTime':
+                      '${metrics.processingTimeMs.toStringAsFixed(1)}ms',
+                },
+              );
+            },
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          // Panel to display detection count and last detection class
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            color: Colors.black.withValues(alpha: 0.1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Detection count: $_detectionCount'),
-                Text('Top detection: $_lastDetection'),
-              ],
-            ),
-          ),
-          // Confidence threshold slider
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                const Text('Confidence threshold: '),
-                Expanded(
-                  child: Slider(
-                    value: _confidenceThreshold,
-                    min: 0.1,
-                    max: 0.9,
-                    divisions: 8,
-                    label: _confidenceThreshold.toStringAsFixed(1),
-                    onChanged: (value) {
-                      setState(() {
-                        _confidenceThreshold = value;
-                        // Update threshold via controller or direct key access
-                        if (_useController) {
-                          _yoloController.setConfidenceThreshold(value);
-                        } else {
-                          _yoloViewKey.currentState?.setConfidenceThreshold(
-                            value,
-                          );
-                        }
-                      });
-                    },
-                  ),
-                ),
-                Text('${(_confidenceThreshold * 100).toInt()}%'),
-              ],
-            ),
-          ),
-          // IoU threshold slider
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                const Text('IoU threshold: '),
-                Expanded(
-                  child: Slider(
-                    value: _iouThreshold,
-                    min: 0.1,
-                    max: 0.9,
-                    divisions: 8,
-                    label: _iouThreshold.toStringAsFixed(1),
-                    onChanged: (value) {
-                      setState(() {
-                        _iouThreshold = value;
-                        // Update threshold via controller or direct key access
-                        if (_useController) {
-                          _yoloController.setIoUThreshold(value);
-                        } else {
-                          _yoloViewKey.currentState?.setIoUThreshold(value);
-                        }
-                      });
-                    },
-                  ),
-                ),
-                Text('${(_iouThreshold * 100).toInt()}%'),
-              ],
-            ),
-          ),
-          // Camera view
-          Expanded(
+
+          // Overlay UI
+          Positioned(
+            top: 50,
+            left: 20,
             child: Container(
-              color: Colors.black12,
-              child: YoloView(
-                // Use GlobalKey or controller based on flag
-                key: _useController ? null : _yoloViewKey,
-                controller: _useController ? _yoloController : null,
-                modelPath: 'yolo11n',
-                task: YOLOTask.detect,
-                onResult: _onDetectionResults,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(10),
+              ),
+
+              child: Text(
+                'Objects: ${currentResults.length}',
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
           ),
+          if (isSheetVisible && selectedResult != null)
+            DraggableScrollableSheet(
+              initialChildSize: 0.35,
+              minChildSize: 0.2,
+              maxChildSize: 0.85,
+              builder:
+                  (context, scrollController) => Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      boxShadow: [
+                        BoxShadow(blurRadius: 5, color: Colors.black26),
+                      ],
+                    ),
+                    child: ListView(
+                      controller: scrollController,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 50,
+                            height: 5,
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[400],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Deteksi Penyakit',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Penyakit: ${selectedResult!.className}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Akurasi: ${(selectedResult!.confidence * 100).toStringAsFixed(1)}%',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          getPreventionSteps(selectedResult!.className),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.close, color: Colors.white,),
+                            label: const Text('Tutup',style: TextStyle(color: Colors.white),),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.purple,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isSheetVisible = false;
+                                selectedResult = null;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+            ),
         ],
       ),
     );
