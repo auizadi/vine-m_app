@@ -15,7 +15,7 @@ class GuideScreen extends StatelessWidget {
             Text(
               'Panduan Aplikasi',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: Colors.white,
               ),
             ),
@@ -53,7 +53,7 @@ class GuideScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
+        
             // step 1
             stepTitle(1, 'Ambil foto secara jelas'),
             stepImage(),

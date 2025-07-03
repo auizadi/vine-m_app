@@ -100,20 +100,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                         ),
               ),
             ),
-            // Expanded(
-            //   flex: 3,
-            //   child: Center(
-            //     child:
-            //         isLoading
-            //             ? CircularProgressIndicator()
-            //             : annotatedImage != null
-            //             ? Image.memory(annotatedImage!)
-            //             : selectedImage != null
-            //             ? Image.file(selectedImage!)
-            //             : Placeholder(),
-            //   ),
-            // ),
-
+            
             // Detection results summary
             Container(
               padding: EdgeInsets.all(8),

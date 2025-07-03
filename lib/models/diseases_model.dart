@@ -19,11 +19,21 @@ class DetectionHistory {
   @HiveField(4)
   bool isSaved;
 
+  @HiveField(5)
+  final bool isFirstLaunch;
+
+  @HiveField(6)
+  final String? userName;
+
   DetectionHistory({
     required this.className,
     required this.confidence,
     required this.imagePath,
     required this.detectionTime,
     this.isSaved = false,
+    this.isFirstLaunch = true,
+    this.userName,
   });
+
+  
 }

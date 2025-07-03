@@ -5,3 +5,7 @@
 -dontwarn java.beans.**
 -keep class org.yaml.snakeyaml.** { *; }
 -keep class java.beans.** { *; }
+# Optimize native libraries
+-keepclassmembers class * {
+    native <methods>;
+}

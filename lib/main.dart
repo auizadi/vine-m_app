@@ -6,6 +6,7 @@ import 'screens/history.dart';
 import 'screens/guide.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/diseases_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,12 @@ class GrapeMobileApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MainScreen(),
+      theme: ThemeData(
+        textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+          bodyLarge: GoogleFonts.poppins(fontWeight: FontWeight.w400),
+          titleLarge: GoogleFonts.poppins(fontWeight: FontWeight.w500)
+        )
+      ),
     );
   }
 }

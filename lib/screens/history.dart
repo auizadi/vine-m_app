@@ -20,7 +20,7 @@ class HistoryScreen extends StatelessWidget {
             Text(
               'Riwayat Deteksi',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: Colors.white,
               ),
             ),
@@ -43,19 +43,21 @@ class HistoryScreen extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  leading: result?.imagePath != null ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(result!.imagePath),
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.broken_image, size: 50);
-                      },
-                    ),
-                  )
-                  : const Icon(Icons.photo, size: 50),
+                  leading:
+                      result?.imagePath != null
+                          ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(result!.imagePath),
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.eco, size: 50);
+                              },
+                            ),
+                          )
+                          : const Icon(Icons.photo, size: 50),
                   title: Text(
                     result?.className ?? 'Unknown',
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -104,13 +106,29 @@ class HistoryScreen extends StatelessWidget {
     Box<DetectionHistory> box,
     int index,
   ) async {
+    // Show loading immediately
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Menghapus riwayat...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
     try {
       await box.deleteAt(index);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Riwayat dihapus'), duration: Duration(seconds: 1),));
+      // Check if widget is still mounted before using context
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Riwayat dihapus'),
+          duration: Duration(seconds: 1),
+        ),
+      );
     } catch (e) {
+      if (!context.mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Gagal menghapus riwayat')));

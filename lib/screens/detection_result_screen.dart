@@ -4,9 +4,8 @@ import 'package:hive/hive.dart';
 import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/main.dart';
 
-
 class DetectionDetailScreen extends StatefulWidget {
-  final String imagePath;
+  final String? imagePath;
   final String className;
   final double confidence;
   final int index;
@@ -14,11 +13,12 @@ class DetectionDetailScreen extends StatefulWidget {
 
   const DetectionDetailScreen({
     super.key,
-    required this.imagePath,
+
     required this.className,
     required this.confidence,
     required this.index,
     this.isFromHistory = false,
+    this.imagePath,
   });
 
   @override
@@ -34,8 +34,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
     super.initState();
     detectionBox = Hive.box<DetectionHistory>('detectionResults');
   }
-
-  
 
   String _getPreventionSteps(String className) {
     // Tambahkan langkah pencegahan berdasarkan jenis penyakit
@@ -55,7 +53,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
     final result = DetectionHistory(
       className: widget.className,
       confidence: widget.confidence,
-      imagePath: widget.imagePath,
+      imagePath: widget.imagePath ?? '',
       detectionTime: DateTime.now(),
       isSaved: true,
     );
@@ -68,7 +66,10 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Hasil deteksi berhasil disimpan'), duration: Duration(seconds: 1)),
+      const SnackBar(
+        content: Text('Hasil deteksi berhasil disimpan'),
+        duration: Duration(seconds: 1),
+      ),
     );
 
     // Navigasi ke HistoryScreen
@@ -78,7 +79,9 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 1)),
+      MaterialPageRoute(
+        builder: (context) => const MainScreen(initialIndex: 1),
+      ),
       (route) => false,
     );
   }
@@ -92,12 +95,14 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            if (widget.isFromHistory){
+            if (widget.isFromHistory) {
               Navigator.pop(context);
             } else {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 1)),
+                MaterialPageRoute(
+                  builder: (context) => const MainScreen(initialIndex: 1),
+                ),
                 (route) => false,
               );
             }
@@ -111,11 +116,18 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
           children: [
             // Gambar yang diupload
             Center(
-              child: Image.file(
-                File(widget.imagePath),
-                height: 200,
-                fit: BoxFit.contain,
-              ),
+              child:
+                  widget.imagePath != null && widget.imagePath!.isNotEmpty
+                      ? Image.file(
+                        File(widget.imagePath!),
+                        height: 200,
+                        fit: BoxFit.contain,
+                      )
+                      : const Icon(
+                        Icons.eco,
+                        size: 100,
+                        color: Colors.grey,
+                      ),
             ),
             const SizedBox(height: 20),
 
@@ -176,17 +188,22 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
             const SizedBox(height: 30),
 
             // Tombol simpan
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: isSaved ? null : _saveResult,
-                icon: const Icon(Icons.save, color: Colors.white),
-                label: const Text('Simpan Hasil', style: TextStyle(color: Colors.white),),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(200, 50),
-                  backgroundColor: isSaved ? Colors.grey : Colors.purple,
+            if (!widget
+                .isFromHistory) //hanya tampil jika bukan dari menu history
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: isSaved ? null : _saveResult,
+                  icon: const Icon(Icons.save, color: Colors.white),
+                  label: const Text(
+                    'Simpan Hasil',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(200, 50),
+                    backgroundColor: isSaved ? Colors.grey : Colors.purple,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
