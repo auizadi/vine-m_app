@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/main.dart';
+import 'package:yolo_grapevine/services/single_image_screen.dart';
 
 class DetectionDetailScreen extends StatefulWidget {
   final String? imagePath;
@@ -13,7 +14,6 @@ class DetectionDetailScreen extends StatefulWidget {
 
   const DetectionDetailScreen({
     super.key,
-
     required this.className,
     required this.confidence,
     required this.index,
@@ -26,7 +26,7 @@ class DetectionDetailScreen extends StatefulWidget {
 }
 
 class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
-  late Box<DetectionHistory> detectionBox;
+  late final Box<DetectionHistory> detectionBox;
   bool isSaved = false;
 
   @override
@@ -35,17 +35,140 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
     detectionBox = Hive.box<DetectionHistory>('detectionResults');
   }
 
-  String _getPreventionSteps(String className) {
-    // Tambahkan langkah pencegahan berdasarkan jenis penyakit
-    switch (className.toLowerCase()) {
-      case 'black rot':
-        return '1. Buang daun yang terinfeksi\n2. Gunakan fungisida yang sesuai\n3. Jaga kebersihan kebun\n4. Pastikan sirkulasi udara baik';
-      case 'esca':
-        return '1. Potong bagian tanaman yang terinfeksi\n2. Gunakan fungisida pencegah\n3. Hindari luka pada batang\n4. Gunakan varietas tahan penyakit';
-      case 'leaf blight':
-        return '1. Semprot dengan fungisida tembaga\n2. Hindari penyiraman dari atas\n3. Jarak tanam yang cukup\n4. Rotasi tanaman';
+  Map<String, Map<String, dynamic>> _getDiseaseDetails(String className) {
+    switch (className) {
+      case 'Healthy':
+        return {
+          'Status': {
+            'content': 'Daun dalam kondisi sehat',
+            'icon': Icons.check_circle,
+          },
+          'Tips': {
+            'content':
+                '1. Lanjutkan perawatan rutin\n2. Pantau kesehatan tanaman secara berkala\n3. Jaga kebersihan kebun\n4. Berikan pupuk secara teratur',
+            'icon': Icons.thumb_up,
+          },
+        };
+
+      case 'Downey_mildew':
+        return {
+          'Penyebab': {'content': 'Plasmopara Viticola', 'icon': Icons.warning},
+          'Gejala': {
+            'content':
+                '1. Bintik-bintik kuning berbentuk lingkaran\n2. Bagian daun muncul bintik-bintik putih berupa jamur',
+            'icon': Icons.visibility,
+          },
+          'Dampak': {
+            'content':
+                '1. Daun yang terinfeksi parah berubah menjadi coklat dan gugur sebelum waktunya\n2. Jamur yang menginfeksi sampai ke buah akan menyebabkan busuk',
+            'icon': Icons.pest_control,
+          },
+          'Pencegahan': {
+            'content':
+                '1. Membuat sirkulasi udara yang baik pada lahan\n2. Menjaga kelembaban tanah tetap rendah\n3.Drainase yang baik mencegah air menggenang terlalu lama\n4. Pemilihan varietas yang bagus',
+            'icon': Icons.shield,
+          },
+          'Penanganan': {
+            'content':
+                '1. Memotong daun yang terinfeksi\n2. Pemberian campuran Bordeaux yang terdiri dari tembaga sulfat dan kapur yang dilarutkan dengan air',
+            'icon': Icons.medical_services,
+          },
+        };
+      case 'Black_rot':
+        return {
+          'Penyebab': {
+            'content': 'Guignardian Bidwelli',
+            'icon': Icons.warning,
+          },
+          'Gejala': {
+            'content':
+                '1. Terdapat bintik-bintik bulat hingga poligonal berwarna coklat kemerahan dengan tepi gelap\n2. Banyak bercak yang terisolasi atau menyatu dapat terbentuk dipermukaan daun',
+            'icon': Icons.visibility,
+          },
+          'Dampak': {
+            'content':
+                '1. Buah membusuk yang diawali dengan warna coklat dan secara bertahap mengkerut',
+            'icon': Icons.pest_control,
+          },
+          'Pencegahan': {
+            'content':
+                '1. Membuat sirkulasi udara yang baik pada lahan\n2. Perawatan tanaman lain disekitar lahan anggur agar tidak terinfekis penyakit dari tanaman lain',
+            'icon': Icons.shield,
+          },
+          'Penanganan': {
+            'content':
+                '1. Memotong dan menghancurkan daun yang terinfeksi\n2. Pengaplikasian fungisida berupa campuran Bordeaux',
+            'icon': Icons.medical_services,
+          },
+        };
+      case 'Esca':
+        return {
+          'Penyebab': {
+            'content': 'Jamur dari famili Phaemoniella dan Chlymydospora',
+            'icon': Icons.warning,
+          },
+          'Gejala': {
+            'content':
+                '1. Daun berubah pucat dan kemudian menguning/memerah secara tidak teratur diantara urat daun dan kadang ditepi daun lama kelamaan daun akan mengering',
+            'icon': Icons.visibility,
+          },
+          'Dampak': {
+            'content':
+                '1. Buah dapat membusuk yang ditandai dengan bintik-bintik biru kehitaman yang disebut campak (measles)',
+            'icon': Icons.pest_control,
+          },
+          'Pencegahan': {
+            'content':
+                '1. Perendaman akar dengan air bersuhu 50°C selama 30 menit ketika pembibitan',
+            'icon': Icons.shield,
+          },
+          'Penanganan': {
+            'content':
+                '1. Pengaplikasian fungisida Benomyl, Prochloraz, Carbendazim + Flusilazole, dan Cyprodinil + Fludioxonil',
+            'icon': Icons.medical_services,
+          },
+        };
+      case 'Leaf_blight':
+        return {
+          'Penyebab': {
+            'content': 'Bakteri Xylophilus Amplinus',
+            'icon': Icons.warning,
+          },
+          'Gejala': {
+            'content':
+                '1. Daun yang terinfeksi akan membentuk lesi bersudut berwarna merah kecoklatan\n2. Sebagian daun berwarna kuning biasanya terjadi saat kelembapan tinggi',
+            'icon': Icons.visibility,
+          },
+          'Dampak': {
+            'content':
+                '1. Jika bakteri menginfeksi hingga tunas akan menyebabkan tunas tampak kerdil dan mati',
+            'icon': Icons.pest_control,
+          },
+          'Pencegahan': {
+            'content':
+                '1. Memastikan saat datang dan pergi ke kebun dalam keadaan bersih\n2. Memantau kehigienisan pengunjung yang masuk ke kebun\n3.Memilih pemasok bibit yang bereputasi baik sehingga bibit dapat terjamin kesehatannya',
+            'icon': Icons.shield,
+          },
+          'Penanganan': {
+            'content':
+                '1. Pengaplikasian fungisida campuran Bordeaux\n2. Pengaplikasian fungisida Mancozeb\n3. Pengaplikasian fungisida Topsin - M\n4. Pengaplikasian fungisida Captan\n4. Pengaplikasian fungisida Ziram',
+            'icon': Icons.medical_services,
+          },
+        };
       default:
-        return '1. Isolasi tanaman yang sakit\n2. Gunakan pestisida organik\n3. Perbaiki drainase tanah\n4. Konsultasikan dengan ahli tanaman';
+        return {
+          'Informasi': {
+            'content': 'Penyakit tanaman belum teridentifikasi secara spesifik',
+            'icon': Icons.help,
+            'color': Colors.grey,
+          },
+          'Saran': {
+            'content':
+                '1. Konsultasikan dengan ahli tanaman\n2. Ambil sampel untuk pemeriksaan lebih lanjut\n3. Isolasi tanaman yang terinfeksi',
+            'icon': Icons.lightbulb,
+            'color': Colors.blue,
+          },
+        };
     }
   }
 
@@ -59,11 +182,9 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
     );
 
     await detectionBox.add(result);
-
     if (!mounted) return;
-    setState(() {
-      isSaved = true;
-    });
+
+    setState(() => isSaved = true);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -72,41 +193,40 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
       ),
     );
 
-    // Navigasi ke HistoryScreen
     await Future.delayed(const Duration(seconds: 1));
-
     if (!mounted) return;
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (context) => const MainScreen(initialIndex: 1),
-      ),
+      MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 1)),
       (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final diseaseDetails = _getDiseaseDetails(widget.className);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detail Deteksi', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Detail Deteksi',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.purple,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (widget.isFromHistory) {
-              Navigator.pop(context);
-            } else {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MainScreen(initialIndex: 1),
-                ),
-                (route) => false,
-              );
-            }
-          },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed:
+              () =>
+                  widget.isFromHistory
+                      ? Navigator.pop(context)
+                      : Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SingleImageScreen(),
+                        ),
+                        (route) => false,
+                      ),
         ),
       ),
       body: SingleChildScrollView(
@@ -114,99 +234,159 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar yang diupload
+            // gambar
             Center(
               child:
-                  widget.imagePath != null && widget.imagePath!.isNotEmpty
+                  (widget.imagePath != null &&
+                          widget.imagePath!.isNotEmpty &&
+                          File(widget.imagePath!).existsSync())
                       ? Image.file(
                         File(widget.imagePath!),
                         height: 200,
                         fit: BoxFit.contain,
                       )
-                      : const Icon(
-                        Icons.eco,
-                        size: 100,
-                        color: Colors.grey,
+                      : const Icon(Icons.eco, size: 100, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            _buildSection(
+              title: 'Hasil Deteksi',
+              children: [
+                _buildInfoRow('Penyakit', widget.className),
+                _buildInfoRow(
+                  'Akurasi',
+                  '${(widget.confidence * 100).toStringAsFixed(1)}%',
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Detail Penyakit
+            ...diseaseDetails.entries.map(
+              (entry) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSection(
+                    title: entry.key,
+                    icon: entry.value['icon'] as IconData?,
+                    // iconColor: entry.value['color'],
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0, top: 8),
+                        child: Text(
+                          entry.value['content'],
+                          style: const TextStyle(fontSize: 15),
+                        ),
                       ),
-            ),
-            const SizedBox(height: 20),
-
-            // Hasil deteksi
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Hasil Deteksi',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text('Penyakit: '),
-                        Text(
-                          widget.className,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Text('Akurasi: '),
-                        Text(
-                          '${(widget.confidence * 100).toStringAsFixed(1)}%',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Langkah pencegahan
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Langkah Pencegahan',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(_getPreventionSteps(widget.className)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            // Tombol simpan
-            if (!widget
-                .isFromHistory) //hanya tampil jika bukan dari menu history
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: isSaved ? null : _saveResult,
-                  icon: const Icon(Icons.save, color: Colors.white),
-                  label: const Text(
-                    'Simpan Hasil',
-                    style: TextStyle(color: Colors.white),
+                    ],
                   ),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(200, 50),
-                    backgroundColor: isSaved ? Colors.grey : Colors.purple,
-                  ),
-                ),
+                  if (entry.key != diseaseDetails.keys.last)
+                    const SizedBox(height: 16),
+                ],
               ),
+            ),
           ],
         ),
       ),
+      bottomNavigationBar:
+          (!widget.isFromHistory && widget.className.isNotEmpty)
+              ? SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ElevatedButton.icon(
+                    onPressed: isSaved ? null : _saveResult,
+                    icon: const Icon(Icons.save, color: Colors.white),
+                    label: const Text(
+                      'Simpan Hasil',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      backgroundColor: isSaved ? Colors.grey : Colors.purple,
+                    ),
+                  ),
+                ),
+              )
+              : null,
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    IconData? icon,
+    Color iconColor = Colors.purple,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            if (icon != null) Icon(icon, size: 20, color: iconColor),
+            if (icon != null) const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: iconColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  Widget stepBulletList(int number, List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          items
+              .map(
+                (e) => Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.purple,
+                      radius: 14,
+                      child: Text(
+                        '$number',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      e,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              .toList(),
     );
   }
 }

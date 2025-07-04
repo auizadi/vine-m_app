@@ -28,8 +28,6 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
   void initState() {
     super.initState();
     controller = YOLOViewController();
-    // optimizer = PerformanceOptimizer(controller);
-    // optimizer.optimizeForSpeed();
   }
 
   void _handleDetectionResult(List<YOLOResult> results) {
@@ -70,7 +68,7 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
             modelPath: 'model_int8',
             task: YOLOTask.detect,
             controller: controller,
-            streamingConfig: MidRangeOptimization.getOptimalConfig(),
+            streamingConfig: LowEndOptimization.getOptimalConfig(),
             onPerformanceMetrics: (metrics) {
               setState(() {
                 currentFPS = metrics.fps;
@@ -78,17 +76,6 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
               });
             },
             onResult: _handleDetectionResult,
-            // onPerformanceMetrics: (metrics) {
-            //   developer.log(
-            //     'Performance Metrics',
-            //     name: 'CameraDetection',
-            //     error: {
-            //       'FPS': metrics.fps.toString(),
-            //       'ProcessingTime':
-            //           '${metrics.processingTimeMs.toStringAsFixed(1)}ms',
-            //     },
-            //   );
-            // },
           ),
 
           // Overlay UI
@@ -182,12 +169,46 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
                                         Theme.of(context).textTheme.titleMedium,
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
-                                    getPreventionSteps(
-                                      selectedResult!.className,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
+                                  ...getDiseaseDetailsHelper(
+                                    selectedResult!.className,
+                                  ).entries.map((entry) {
+                                    final title = entry.key;
+                                    final content =
+                                        entry.value['content'] as String;
+                                    final icon =
+                                        entry.value['icon'] as IconData;
+
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 12,
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(icon, color: Colors.purple),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  title,
+                                                  style:
+                                                      Theme.of(
+                                                        context,
+                                                      ).textTheme.titleSmall,
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(content),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  })
                                 ],
                               ),
                             ),
