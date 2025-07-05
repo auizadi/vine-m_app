@@ -80,7 +80,7 @@ class GuideScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
             const Text(
-              'Pro Tips',
+              'Pro Tips❗',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),

@@ -46,7 +46,7 @@ class HistoryScreen extends StatelessWidget {
                   leading:
                       result?.imagePath != null
                           ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                             child: Image.file(
                               File(result!.imagePath),
                               width: 50,

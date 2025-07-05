@@ -27,7 +27,8 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
 
   Future<void> loadYOLO() async {
     setState(() => isLoading = true);
-    yolo = YOLO(modelPath: 'model_int8', task: YOLOTask.detect);
+    yolo = YOLO(modelPath: 'model_int8', 
+    task: YOLOTask.detect);
     await yolo!.loadModel();
     setState(() => isLoading = false);
   }
@@ -93,7 +94,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                             ),
                             SizedBox(height: 10),
                             Text(
-                              'No image selected',
+                              'Tidak ada gambar yang dipilih',
                               style: TextStyle(color: Colors.grey),
                             ),
                           ],
@@ -105,7 +106,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
             Container(
               padding: EdgeInsets.all(8),
               child: Text(
-                'Detected ${results.length} objects',
+                'Objek yang terdeteksi ${results.length}',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
@@ -126,7 +127,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
-                        'Confidence: ${(detection['confidence'] * 100).toStringAsFixed(1)}%',
+                        'Akurasi: ${(detection['confidence'] * 100).toStringAsFixed(1)}%',
                       ),
                       trailing: Icon(Icons.arrow_forward),
                       onTap: () {
@@ -157,7 +158,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(8),
-                  child: Text('Pick Image & Detect Objects'),
+                  child: Text('Upload Gambar dan Deteksi'),
                 ),
                 
               ),

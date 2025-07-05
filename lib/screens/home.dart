@@ -5,6 +5,7 @@ import '../services/single_image_screen.dart'; // Buat file ini dari SingleImage
 import 'package:lucide_icons/lucide_icons.dart';
 import '../screens/info.dart';
 import 'package:hive/hive.dart';
+// import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,11 +36,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    // ambil data user daru Hive
-    final prefsBox = Hive.box<DetectionHistory>('detectionResults');
-    final userPrefs = prefsBox.get('app_preferences');
-    final userName = userPrefs?.userName;
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -99,34 +95,6 @@ class _HomeScreenState extends State<HomeScreen>
 
       body: Column(
         children: [
-          if (userName != null && userName.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                color: Colors.purple.withValues(alpha: .1),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.person, color: Colors.purple),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Selamat Datang, $userName!',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           Expanded(
             child: Center(
               child: Row(

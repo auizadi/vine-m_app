@@ -1,6 +1,11 @@
 // import 'package:ultralytics_yolo/yolo_view.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
+import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/optimization/device_specific_opt.dart';
 // import 'dart:developer' as developer;
 import 'package:yolo_grapevine/services/prevention_helper.dart';
@@ -23,6 +28,63 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
   DateTime? lastDetectionTime;
   double? currentFPS;
   double? currentProcessingTime;
+  bool _isSaving = false;
+
+  Future<void> _captureFrameWithDetection() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      final capturedImage = await controller.captureFrame();
+
+      if (capturedImage != null && selectedResult != null) {
+        // simpan gambar
+        final directory = await getApplicationCacheDirectory();
+        final timeStamp = DateTime.now().millisecondsSinceEpoch;
+        final imagePath = '${directory.path}/capture_$timeStamp.jpg';
+        await File(imagePath).writeAsBytes(capturedImage);
+        final detectionBox = Hive.box<DetectionHistory>('detectionResults');
+
+        // simpan history
+        await detectionBox.add(
+          DetectionHistory(
+            className: selectedResult!.className,
+            confidence: selectedResult!.confidence,
+            imagePath: imagePath,
+            detectionTime: DateTime.now(),
+            isSaved: true,
+          )
+        );
+
+        if (!mounted) return;
+        // navigasi ke detail screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder:
+                (_) => DetectionDetailScreen(
+                  className: selectedResult!.className,
+                  confidence: selectedResult!.confidence,
+                  index: detectionBox.length - 1,
+                  isFromHistory: false,
+                  fromCamera: true,
+                  imagePath: imagePath,
+                ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengambil gambar: ${e.toString()}')),
+      );
+    } finally {
+      if(mounted){
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -49,6 +111,10 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final diseaseData =
+        selectedResult != null
+            ? getDiseaseDetailsHelper(selectedResult!.className)
+            : {};
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -148,67 +214,33 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Deteksi Penyakit',
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildDetailRow(
-                                    'Penyakit',
-                                    selectedResult!.className,
-                                  ),
-                                  _buildDetailRow(
-                                    'Akurasi',
-                                    '${(selectedResult!.confidence * 100).toStringAsFixed(1)}%',
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Langkah Pencegahan',
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  ...getDiseaseDetailsHelper(
-                                    selectedResult!.className,
-                                  ).entries.map((entry) {
-                                    final title = entry.key;
-                                    final content =
-                                        entry.value['content'] as String;
-                                    final icon =
-                                        entry.value['icon'] as IconData;
-
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 12,
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Icon(icon, color: Colors.purple),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  title,
-                                                  style:
-                                                      Theme.of(
-                                                        context,
-                                                      ).textTheme.titleSmall,
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(content),
-                                              ],
-                                            ),
+                                  for (var entry in diseaseData.entries) ...[
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          entry.value['icon'],
+                                          size: 20,
+                                          color: Colors.purple,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          entry.key,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.purple,
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                  })
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (entry.value['content'] is List)
+                                      _buildNumberedList(entry.value['content'])
+                                    else if (entry.value['content'] is String)
+                                      Text(entry.value['content']),
+                                    const SizedBox(height: 16),
+                                  ],
                                 ],
                               ),
                             ),
@@ -251,6 +283,7 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
                                                   selectedResult!.confidence,
                                               index: 0,
                                               isFromHistory: false,
+                                              fromCamera: true,
                                             ),
                                       ),
                                     );
@@ -276,6 +309,47 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
             ),
         ],
       ),
+      floatingActionButton: _isSaving
+          ? const CircularProgressIndicator()
+          : FloatingActionButton(
+            onPressed: _captureFrameWithDetection,
+            child: const Icon(Icons.camera_alt),
+          )
+    );
+  }
+
+  Widget _buildNumberedList(List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < items.length; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Purple circular number
+                CircleAvatar(
+                  backgroundColor: Colors.purple,
+                  radius: 14,
+                  child: Text(
+                    '${i + 1}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Content text
+                Expanded(
+                  child: Text(items[i], style: const TextStyle(fontSize: 16)),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
@@ -294,23 +368,23 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          const Text(': '),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
+  // Widget _buildDetailRow(String label, String value) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 12),
+  //     child: Row(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         SizedBox(
+  //           width: 80,
+  //           child: Text(
+  //             label,
+  //             style: const TextStyle(fontWeight: FontWeight.bold),
+  //           ),
+  //         ),
+  //         const Text(': '),
+  //         Expanded(child: Text(value)),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

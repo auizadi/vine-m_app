@@ -22,9 +22,6 @@ class DetectionHistory {
   @HiveField(5)
   final bool isFirstLaunch;
 
-  @HiveField(6)
-  final String? userName;
-
   DetectionHistory({
     required this.className,
     required this.confidence,
@@ -32,8 +29,5 @@ class DetectionHistory {
     required this.detectionTime,
     this.isSaved = false,
     this.isFirstLaunch = true,
-    this.userName,
   });
-
-  
 }

@@ -23,14 +23,13 @@ class DetectionHistoryAdapter extends TypeAdapter<DetectionHistory> {
       detectionTime: fields[3] as DateTime,
       isSaved: fields[4] as bool,
       isFirstLaunch: fields[5] as bool,
-      userName: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, DetectionHistory obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.className)
       ..writeByte(1)
@@ -42,9 +41,7 @@ class DetectionHistoryAdapter extends TypeAdapter<DetectionHistory> {
       ..writeByte(4)
       ..write(obj.isSaved)
       ..writeByte(5)
-      ..write(obj.isFirstLaunch)
-      ..writeByte(6)
-      ..write(obj.userName);
+      ..write(obj.isFirstLaunch);
   }
 
   @override
