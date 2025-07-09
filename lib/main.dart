@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yolo_grapevine/screens/splash_screen.dart';
 // import 'package:hive/hive.dart';
 // import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 import 'screens/home.dart';
@@ -11,8 +12,13 @@ import 'package:google_fonts/google_fonts.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+
+  // box untuk menyimpan hasil deteksi
   Hive.registerAdapter(DetectionHistoryAdapter());
   await Hive.openBox<DetectionHistory>('detectionResults');
+
+  // box untuk menyimpan flag onboarding
+  await Hive.openBox('settings');
   runApp(const GrapeMobileApp());
 }
 
@@ -21,14 +27,16 @@ class GrapeMobileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // cek onboarding for the first time
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+
+      home: const SplashScreen(),
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme().copyWith(
           bodyLarge: GoogleFonts.poppins(fontWeight: FontWeight.w400),
-          titleLarge: GoogleFonts.poppins(fontWeight: FontWeight.w500)
-        )
+          titleLarge: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }
@@ -47,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
   late int _selectedIndex;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
   }
@@ -58,29 +66,61 @@ class _MainScreenState extends State<MainScreen> {
     setState(() => _selectedIndex = index);
   }
 
+  Future<bool> _onWillPop() async {
+    return await showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Konfirmasi'),
+                content: const Text('Apakah anda yakin keluar aplikasi?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Tidak'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Ya'),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.purple,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Guide'),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) async {
+        if (didPop) {
+          return;
+        }
+        final NavigatorState navigator = Navigator.of(context);
+        final bool? shouldPop = await _onWillPop();
+        if (shouldPop ?? false) {
+          navigator.pop();
+        }
+      },
+      child: Scaffold(
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: Color(0xff7864f6),
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              label: 'History',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book),
+              label: 'Guide',
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  
 }
-
-
-
-
-
-
-

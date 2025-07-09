@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 
-Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(String className) {
+Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(
+  String className,
+  double confidence,
+) {
   switch (className) {
     case 'Healthy':
       return {
+        'Hasil Deteksi': {
+          'content': [
+            'Tanaman dalam kondisi sehat',
+            'Akurasi: ${(confidence * 100).toStringAsFixed(1)}%',
+          ],
+          'icon': Icons.analytics,
+        },
         'Status': {
           'content': ['Daun dalam kondisi sehat'],
           'icon': Icons.check_circle,
@@ -22,6 +32,13 @@ Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(String className) {
 
     case 'Downey_mildew':
       return {
+        'Hasil Deteksi': {
+          'content': [
+            'Penyakit: $className',
+            'Akurasi: ${(confidence * 100).toStringAsFixed(2)}%',
+          ],
+          'icon': Icons.analytics,
+        },
         'Penyebab': {
           'content': ['Plasmopara Viticola'],
           'icon': Icons.warning,
@@ -63,6 +80,13 @@ Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(String className) {
       };
     case 'Black_rot':
       return {
+        'Hasil Deteksi': {
+          'content': [
+            'Penyakit: $className',
+            'Akurasi: ${(confidence * 100).toStringAsFixed(1)}%',
+          ],
+          'icon': Icons.analytics,
+        },
         'Penyebab': {
           'content': ['Guignardian Bidwelli'],
           'icon': Icons.warning,
@@ -100,6 +124,13 @@ Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(String className) {
       };
     case 'Esca':
       return {
+        'Hasil Deteksi': {
+          'content': [
+            'Penyakit: $className',
+            'Akurasi: ${(confidence * 100).toStringAsFixed(1)}%',
+          ],
+          'icon': Icons.analytics,
+        },
         'Penyebab': {
           'content': ['Jamur dari famili Phaemoniella dan Chlymydospora'],
           'icon': Icons.warning,
@@ -134,6 +165,13 @@ Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(String className) {
       };
     case 'Leaf_blight':
       return {
+        'Hasil Deteksi': {
+          'content': [
+            'Penyakit: $className',
+            'Akurasi: ${(confidence * 100).toStringAsFixed(1)}%',
+          ],
+          'icon': Icons.analytics,
+        },
         'Penyebab': {
           'content': ['Bakteri Xylophilus Amplinus'],
           'icon': Icons.warning,

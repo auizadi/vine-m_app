@@ -15,7 +15,6 @@ class DetectionDetailScreen extends StatefulWidget {
   final bool isFromHistory;
   final bool fromCamera;
   final Uint8List? imageData;
-  
 
   const DetectionDetailScreen({
     super.key,
@@ -237,20 +236,37 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
       detectionTime: DateTime.now(),
       isSaved: true,
     );
-
-    await detectionBox.add(result);
-    if (!mounted) return;
-
-    setState(() => isSaved = true);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Hasil deteksi berhasil disimpan'),
-        duration: Duration(seconds: 1),
-      ),
+    // cek apakah sudah ada hasil deteksi dengan path dan waktu mirip
+    final alreadySaved = detectionBox.values.any(
+      (item) =>
+          item.imagePath == (widget.imagePath ?? '') &&
+          item.className == widget.className &&
+          item.confidence == widget.confidence,
     );
 
-    await Future.delayed(const Duration(seconds: 1));
+    if (alreadySaved) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hasil deteksi sudah tersimpan'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      // return;
+    } else {
+      await detectionBox.add(result);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hasil deteksi berhasil disimpan'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+
+    // if (!mounted) return;
+
+    // setState(() => isSaved = true);
+
+    // await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
 
     Navigator.pushAndRemoveUntil(
@@ -290,6 +306,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
           },
         ),
       ),
+      
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -297,16 +314,21 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
           children: [
             // gambar
             Center(
-              child:
-                  widget.imageData != null
-                      ? Image.memory(
-                        widget.imageData!,
-                      ) // Tampilkan dari memory jika ada
-                      : (widget.imagePath != null &&
-                          widget.imagePath!.isNotEmpty &&
-                          File(widget.imagePath!).existsSync())
-                      ? Image.file(File(widget.imagePath!)) // Fallback ke file
-                      : const Icon(Icons.eco, size: 100, color: Colors.grey),
+              child: ClipRRect(
+                borderRadius: BorderRadiusGeometry.circular(16),
+                child:
+                    widget.imageData != null
+                        ? Image.memory(
+                          widget.imageData!,
+                        ) // Tampilkan dari memory jika ada
+                        : (widget.imagePath != null &&
+                            widget.imagePath!.isNotEmpty &&
+                            File(widget.imagePath!).existsSync())
+                        ? Image.file(
+                          File(widget.imagePath!),
+                        ) // Fallback ke file
+                        : const Icon(Icons.eco, size: 100, color: Colors.grey),
+              ),
             ),
             const SizedBox(height: 24),
             _buildSection(
@@ -364,7 +386,11 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: ElevatedButton.icon(
-                    onPressed: isSaved ? null : _saveResult,
+                    onPressed: () async {
+                      await _saveResult();
+                      if(mounted) setState(() => isSaved = true );
+                    },
+                        
                     icon: const Icon(Icons.save, color: Colors.white),
                     label: const Text(
                       'Simpan Hasil',
@@ -447,7 +473,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
                     '${i + 1}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

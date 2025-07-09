@@ -21,7 +21,7 @@ class GuideScreen extends StatelessWidget {
             ),
           ],
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xff7864f6),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -30,7 +30,7 @@ class GuideScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.purple,
+                color: Color(0xff7864f6),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Column(
@@ -109,7 +109,7 @@ class GuideScreen extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: Colors.purple,
+            backgroundColor: Color(0xff7864f6),
             child: Text('$number', style: const TextStyle(color: Colors.white)),
           ),
           const SizedBox(width: 12),
@@ -128,7 +128,7 @@ class GuideScreen extends StatelessWidget {
       height: 100,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.purple,
+        color: Color(0xff7864f6),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Icon(Icons.image, color: Colors.white, size: 48),

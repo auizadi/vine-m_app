@@ -26,7 +26,7 @@ class HistoryScreen extends StatelessWidget {
             ),
           ],
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xff7864f6),
       ),
       body: ValueListenableBuilder(
         valueListenable:

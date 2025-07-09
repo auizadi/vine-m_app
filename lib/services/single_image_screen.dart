@@ -61,8 +61,8 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Single Image Detection', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-          backgroundColor: Colors.purple,
+          title: Text('Deteksi Gambar Tunggal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+          backgroundColor: Color(0xff7864f6),
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white,),
             onPressed: () {

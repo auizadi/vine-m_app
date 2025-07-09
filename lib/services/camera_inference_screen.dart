@@ -8,7 +8,6 @@ import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/optimization/device_specific_opt.dart';
 // import 'dart:developer' as developer;
-import 'package:yolo_grapevine/services/prevention_helper.dart';
 import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 
 // For even better practice:
@@ -24,15 +23,25 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
   // late PerformanceOptimizer optimizer;
   List<YOLOResult> currentResults = [];
   YOLOResult? selectedResult;
-  bool isSheetVisible = false;
+  // bool isSheetVisible = false;
   DateTime? lastDetectionTime;
   double? currentFPS;
   double? currentProcessingTime;
   bool _isSaving = false;
+  bool _isCapturing = false;
 
   Future<void> _captureFrameWithDetection() async {
-    if (_isSaving) return;
-    setState(() => _isSaving = true);
+    if (_isSaving || _isCapturing) return;
+    if (selectedResult == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tidak ada objek terdeteksi')),
+      );
+      return;
+    }
+    setState(() {
+      _isSaving = true;
+      _isCapturing = true;
+    });
     try {
       final capturedImage = await controller.captureFrame();
 
@@ -52,7 +61,7 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
             imagePath: imagePath,
             detectionTime: DateTime.now(),
             isSaved: true,
-          )
+          ),
         );
 
         if (!mounted) return;
@@ -78,9 +87,10 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
         SnackBar(content: Text('Gagal mengambil gambar: ${e.toString()}')),
       );
     } finally {
-      if(mounted){
+      if (mounted) {
         setState(() {
           _isSaving = false;
+          _isCapturing = false;
         });
       }
     }
@@ -93,35 +103,30 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
   }
 
   void _handleDetectionResult(List<YOLOResult> results) {
+    if (_isCapturing) return;
+
     if (results.isEmpty) {
       setState(() {
         currentResults = [];
-        isSheetVisible = false;
         selectedResult = null;
       });
     } else {
       setState(() {
         currentResults = results;
         selectedResult = results.first;
-        isSheetVisible = true;
-        lastDetectionTime = DateTime.now();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final diseaseData =
-        selectedResult != null
-            ? getDiseaseDetailsHelper(selectedResult!.className)
-            : {};
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Camera Detection',
+          'Deteksi Real-Time',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xff7864f6),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -175,181 +180,15 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
               ],
             ),
           ),
-          if (isSheetVisible && selectedResult != null)
-            DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.2,
-              maxChildSize: 0.85,
-              snap: true,
-              builder:
-                  (context, scrollController) => Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                      boxShadow: [
-                        BoxShadow(blurRadius: 5, color: Colors.black26),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 5,
-                          margin: const EdgeInsets.only(top: 10, bottom: 15),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            controller: scrollController,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  for (var entry in diseaseData.entries) ...[
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          entry.value['icon'],
-                                          size: 20,
-                                          color: Colors.purple,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          entry.key,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.purple,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    if (entry.value['content'] is List)
-                                      _buildNumberedList(entry.value['content'])
-                                    else if (entry.value['content'] is String)
-                                      Text(entry.value['content']),
-                                    const SizedBox(height: 16),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed:
-                                      () => setState(
-                                        () => isSheetVisible = false,
-                                      ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.purple,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    "Tutup",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (_) => DetectionDetailScreen(
-                                              className:
-                                                  selectedResult!.className,
-                                              confidence:
-                                                  selectedResult!.confidence,
-                                              index: 0,
-                                              isFromHistory: false,
-                                              fromCamera: true,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Detail',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-            ),
         ],
       ),
-      floatingActionButton: _isSaving
-          ? const CircularProgressIndicator()
-          : FloatingActionButton(
-            onPressed: _captureFrameWithDetection,
-            child: const Icon(Icons.camera_alt),
-          )
-    );
-  }
-
-  Widget _buildNumberedList(List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (int i = 0; i < items.length; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Purple circular number
-                CircleAvatar(
-                  backgroundColor: Colors.purple,
-                  radius: 14,
-                  child: Text(
-                    '${i + 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Content text
-                Expanded(
-                  child: Text(items[i], style: const TextStyle(fontSize: 16)),
-                ),
-              ],
-            ),
-          ),
-      ],
+      floatingActionButton:
+          _isSaving
+              ? const CircularProgressIndicator()
+              : FloatingActionButton(
+                onPressed: _captureFrameWithDetection,
+                child: const Icon(Icons.camera_alt),
+              ),
     );
   }
 
@@ -367,24 +206,4 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
       ),
     );
   }
-
-  // Widget _buildDetailRow(String label, String value) {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(bottom: 12),
-  //     child: Row(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         SizedBox(
-  //           width: 80,
-  //           child: Text(
-  //             label,
-  //             style: const TextStyle(fontWeight: FontWeight.bold),
-  //           ),
-  //         ),
-  //         const Text(': '),
-  //         Expanded(child: Text(value)),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

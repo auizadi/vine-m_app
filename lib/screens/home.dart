@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:yolo_grapevine/models/diseases_model.dart';
+// import 'package:yolo_grapevine/models/diseases_model.dart';
 import '../services/camera_inference_screen.dart'; // Buat file ini dari CameraInferenceScreen
 import '../services/single_image_screen.dart'; // Buat file ini dari SingleImageScreen
 import 'package:lucide_icons/lucide_icons.dart';
 import '../screens/info.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 // import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xff7864f6),
         actions: [
           Row(
             children: [
@@ -101,10 +101,6 @@ class _HomeScreenState extends State<HomeScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    child: const Text(
-                      'Camera\nInference',
-                      textAlign: TextAlign.center,
-                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -113,13 +109,27 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       );
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff7864f6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Deteksi\nReal-Time',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
-                    child: const Text(
-                      'Single\nImage Inference',
-                      textAlign: TextAlign.center,
-                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -128,6 +138,24 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       );
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff7864f6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Deteksi\nUpload Gambar',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
