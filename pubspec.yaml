@@ -49,6 +49,7 @@ dependencies:
   another_flutter_splash_screen: ^1.2.1
   introduction_screen: ^3.1.17
   flutter_svg: ^2.2.0
+  carousel_slider: ^5.1.1
   
 
 dev_dependencies:
@@ -83,6 +84,7 @@ flutter:
     - android/app/src/main/assets/intro1.svg
     - android/app/src/main/assets/intro2.svg
     - android/app/src/main/assets/intro3.svg
+    - android/app/src/main/assets/intro4.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

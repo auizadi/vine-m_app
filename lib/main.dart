@@ -19,6 +19,9 @@ void main() async {
 
   // box untuk menyimpan flag onboarding
   await Hive.openBox('settings');
+  // box profile
+  await Hive.openBox('userProfile');
+
   runApp(const GrapeMobileApp());
 }
 
