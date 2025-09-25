@@ -85,6 +85,7 @@ flutter:
     - android/app/src/main/assets/intro2.svg
     - android/app/src/main/assets/intro3.svg
     - android/app/src/main/assets/intro4.svg
+    - android/app/src/main/assets/images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

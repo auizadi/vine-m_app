@@ -185,10 +185,13 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
       floatingActionButton:
           _isSaving
               ? const CircularProgressIndicator()
-              : FloatingActionButton(
+              : FloatingActionButton(                       
                 onPressed: _captureFrameWithDetection,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 child: const Icon(Icons.camera_alt),
+
               ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

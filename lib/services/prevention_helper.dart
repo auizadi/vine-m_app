@@ -108,7 +108,7 @@ Map<String, Map<String, dynamic>> getDiseaseDetailsHelper(
         'Pencegahan': {
           'content': [
             'Membuat sirkulasi udara yang baik pada lahan',
-            'Perawatan tanaman lain disekitar lahan anggur agar tidak terinfekis penyakit dari tanaman lain',
+            'Perawatan tanaman lain disekitar lahan anggur agar tidak terinfeksi penyakit dari tanaman lain',
           ],
 
           'icon': Icons.shield,

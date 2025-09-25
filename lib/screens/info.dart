@@ -8,81 +8,99 @@ class InfoScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Informasi",
+          "Informasi Aplikasi",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xff7864f6),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 16),
-            child: Text(
-              '''Aplikasi VineCare adalah aplikasi deteksi penyakit daun tanaman anggur yang dapat mendeteksi daun tanaman yang sehat dan terserang penyakit. Aplikasi ini dapat mendeteksi 4 penyakit daun yakni black rot, downy mildew, leaf blight, dan esca.''',
-              style: const TextStyle(fontSize: 16),
-              textAlign: TextAlign.justify,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            sectionTitle('📌 Tentang Aplikasi'),
+            sectionText(
+              '''VineCare adalah aplikasi cerdas berbasis kecerdasan buatan untuk mendeteksi penyakit daun tanaman anggur secara otomatos. Aplikasi ini membantu petani dan penggiat tanaman menjaga kualitas tanaman mereka secara cepat dan efisien.''',
             ),
-          ),
-          DiseaseExpansionTile(
-            diseaseName: 'Black Rot',
-            prevention:
-                '1. Buang daun yang terinfeksi\n2. Gunakan fungisida secara berkala\n3. Jaga sirkulasi udara di kebun',
-            treatment:
-                '1. Semprotkan fungisida berbasis tembaga\n2. Pangkas daun yang terinfeksi\n3. Hindari kelembaban tinggi',
-          ),
-          DiseaseExpansionTile(
-            diseaseName: 'Black Rot',
-            prevention:
-                '1. Buang daun yang terinfeksi\n2. Gunakan fungisida secara berkala\n3. Jaga sirkulasi udara di kebun',
-            treatment:
-                '1. Semprotkan fungisida berbasis tembaga\n2. Pangkas daun yang terinfeksi\n3. Hindari kelembaban tinggi',
-          ),
-          DiseaseExpansionTile(
-            diseaseName: 'Black Rot',
-            prevention:
-                '1. Buang daun yang terinfeksi\n2. Gunakan fungisida secara berkala\n3. Jaga sirkulasi udara di kebun',
-            treatment:
-                '1. Semprotkan fungisida berbasis tembaga\n2. Pangkas daun yang terinfeksi\n3. Hindari kelembaban tinggi',
-          ),
-          DiseaseExpansionTile(
-            diseaseName: 'Black Rot',
-            prevention:
-                '1. Buang daun yang terinfeksi\n2. Gunakan fungisida secara berkala\n3. Jaga sirkulasi udara di kebun',
-            treatment:
-                '1. Semprotkan fungisida berbasis tembaga\n2. Pangkas daun yang terinfeksi\n3. Hindari kelembaban tinggi',
-          ),
-        ],
+            const SizedBox(height: 16),
+            sectionTitle('🌿 Jenis Penyakit yang Dideteksi'),
+            _buildNumberedList(['Downy Mildew','Black Rot','Leaf Blight','Esca']),
+           
+            const SizedBox(height: 16),
+            sectionTitle('📦 Fitur Aplikasi'),
+            _buildNumberedList(['Deteksi Real-time','Deteksi dengan upload gambar', 'Simpan dan lihat riwayat deteksi', 'Panduan perawatan tanaman']),
+
+            const SizedBox(height: 16),
+            sectionTitle('🔒 Privasi & Data'),
+            _buildNumberedList(['Aplikasi tidak menyimpan data pribadi pengguna', 'Gambar hanya digunakan untuk deteksi dan disimpan lokal', 'Semua data tersimpan aman di perangkat pengguna']),
+
+            const SizedBox(height: 16),
+            sectionTitle('📞 Kontak & Bantuan'),
+            _buildNumberedList(['Email: dani@mail.com', 'Hubungi kami untuk saran, masukan, atau bantuan teknis']),
+
+          ],
+        ),
       ),
     );
   }
 }
 
-class DiseaseExpansionTile extends StatelessWidget {
-  final String diseaseName;
-  final String prevention;
-  final String treatment;
+Widget sectionTitle(String text) {
+  return Text(
+    text,
+    style: TextStyle(
+      color: Color(0xff7864f6),
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+}
 
-  const DiseaseExpansionTile({
-    super.key,
-    required this.diseaseName,
-    required this.prevention,
-    required this.treatment,
-  });
+Widget sectionText(String text) {
+  return Padding(
+    padding: const EdgeInsets.only(top: 4.0),
+    child: Text(
+      text,
+      style: TextStyle(fontSize: 14),
+      textAlign: TextAlign.justify,
+    ),
+  );
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return ExpansionTile(
-      title: Text(
-        diseaseName,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      children: [
-        ListTile(title: const Text('Pencegahan'), subtitle: Text(prevention)),
-        ListTile(title: const Text('Penanganan'), subtitle: Text(treatment)),
-        const Divider(),
-      ],
-    );
-  }
+Widget _buildNumberedList(List<String> items) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      for (int i = 0; i < items.length; i++)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                backgroundColor: Color(0xff7864f6),
+                radius: 10,
+                child: Text(
+                  '${i + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  items[i],
+                  style: const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.justify,
+                ),
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
 }

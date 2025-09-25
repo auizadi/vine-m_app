@@ -12,8 +12,8 @@ class SplashScreen extends StatelessWidget {
     return FlutterSplashScreen.fadeIn(
       animationCurve: Curves.easeIn,
       backgroundColor: Colors.yellow,
-      duration: const Duration(seconds: 3),
-      animationDuration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 15),
+      animationDuration: const Duration(seconds: 10),
       onInit: () {
         debugPrint("On Init");
       },

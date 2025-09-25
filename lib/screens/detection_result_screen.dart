@@ -286,7 +286,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
           'Detail Deteksi',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: Color(0xff7864f6),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -355,7 +355,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
                           Icon(
                             entry.value['icon'],
                             size: 20,
-                            color: Colors.purple,
+                            color: Color(0xff7864f6),
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -363,7 +363,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.purple,
+                              color: Color(0xff7864f6),
                             ),
                           ),
                         ],
@@ -398,7 +398,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
                     ),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(50),
-                      backgroundColor: isSaved ? Colors.grey : Colors.purple,
+                      backgroundColor: isSaved ? Colors.grey : Color(0xff7864f6),
                     ),
                   ),
                 ),
@@ -410,7 +410,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
   Widget _buildSection({
     required String title,
     IconData? icon,
-    Color iconColor = Colors.purple,
+    Color iconColor =const Color(0xff7864f6),
     required List<Widget> children,
   }) {
     return Column(
@@ -467,7 +467,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Color(0xff7864f6),
                   radius: 10,
                   child: Text(
                     '${i + 1}',
