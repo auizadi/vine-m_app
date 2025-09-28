@@ -27,7 +27,8 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
 
   Future<void> loadYOLO() async {
     setState(() => isLoading = true);
-    yolo = YOLO(modelPath: 'model_int8', 
+    yolo = YOLO(modelPath: 'nadam-best_int8', 
+    useGpu: false,
     task: YOLOTask.detect);
     await yolo!.loadModel();
     setState(() => isLoading = false);

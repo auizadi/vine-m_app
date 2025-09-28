@@ -57,14 +57,17 @@ class _FormScreenState extends State<FormScreen> {
         'imagePath': savedImage.path,
         'lastUpdated': DateTime.now().toString(),
       });
+      // 3. tandai profil sudah lengkap disettings box
+      final settingsBox = Hive.box('settings');
+      await settingsBox.put('profile_completed', true);
 
-      // 3. Tampilkan feedback
+      // 4. Tampilkan feedback
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Profil berhasil disimpan')));
 
-      // 4. navigasi ke HomeScreen
+      // 5. navigasi ke HomeScreen
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),
@@ -208,10 +211,20 @@ class _FormScreenState extends State<FormScreen> {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xff7864f6),
                 ),
-                child: const Text(
-                  'Kirim',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
+                child:
+                    _isSubmitting
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Text(
+                          'Kirim',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
               ),
             ],
           ),

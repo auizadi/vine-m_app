@@ -18,10 +18,25 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   void _onIntroEnd(context) async {
     final settingsBox = Hive.box('settings');
     await settingsBox.put('onboarding_seen', true);
+    // setelah onboarding, cek apakah profil sudah lengkap
+    final hasCompletedProfile = settingsBox.get(
+      'profile_completed',
+      defaultValue: false,
+    );
 
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
+    if (!mounted) return;
+
+    if (hasCompletedProfile) {
+      // jika sudah lengkapi profil, langsung ke MainScreen
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
+    } else {
+      // jika belum lengkapi profil, ke FormScreen
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const FormScreen()));
+    }
   }
 
   Widget _buildImage(String assetName, [double width = 230]) {
@@ -55,13 +70,6 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       showDoneButton: false,
       globalBackgroundColor: Color(0xff7864F6),
       infiniteAutoScroll: false,
-
-      // globalHeader: Align(
-      //   alignment: Alignment.topRight,
-      //   child: SafeArea(
-      //     child: Padding(padding: const EdgeInsets.only(top: 16, right: 16)),
-      //   ),
-      // ),
       pages: [
         PageViewModel(
           title: 'VineCare',
@@ -122,10 +130,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
       ),
       next: const Icon(Icons.arrow_forward, color: Colors.white),
-      // done: const Text(
-      //   'Selesai',
-      //   style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
-      // ),
+      
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
       controlsPadding:

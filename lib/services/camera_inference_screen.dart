@@ -1,6 +1,5 @@
 // import 'package:ultralytics_yolo/yolo_view.dart';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -46,26 +45,16 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
       final capturedImage = await controller.captureFrame();
 
       if (capturedImage != null && selectedResult != null) {
-        // simpan gambar
-        final directory = await getApplicationCacheDirectory();
+        // Simpan gambar ke cache sementara
+        final directory =
+            await getTemporaryDirectory(); // Gunakan temporary directory
         final timeStamp = DateTime.now().millisecondsSinceEpoch;
         final imagePath = '${directory.path}/capture_$timeStamp.jpg';
         await File(imagePath).writeAsBytes(capturedImage);
-        final detectionBox = Hive.box<DetectionHistory>('detectionResults');
 
-        // simpan history
-        await detectionBox.add(
-          DetectionHistory(
-            className: selectedResult!.className,
-            confidence: selectedResult!.confidence,
-            imagePath: imagePath,
-            detectionTime: DateTime.now(),
-            isSaved: true,
-          ),
-        );
-
+        // JANGAN simpan ke Hive dulu, hanya navigasi ke detail screen
         if (!mounted) return;
-        // navigasi ke detail screen
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -73,10 +62,11 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
                 (_) => DetectionDetailScreen(
                   className: selectedResult!.className,
                   confidence: selectedResult!.confidence,
-                  index: detectionBox.length - 1,
+                  index: -1, // Karena belum disimpan, index = -1
                   isFromHistory: false,
                   fromCamera: true,
                   imagePath: imagePath,
+                  imageData: capturedImage, // Kirim image data juga
                 ),
           ),
         );
@@ -136,7 +126,8 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
         children: [
           // Camera view with YOLO processing
           YOLOView(
-            modelPath: 'model_int8',
+            modelPath: 'nadam-best_int8',
+            useGpu: false,
             task: YOLOTask.detect,
             controller: controller,
             streamingConfig: LowEndOptimization.getOptimalConfig(),
@@ -185,13 +176,14 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
       floatingActionButton:
           _isSaving
               ? const CircularProgressIndicator()
-              : FloatingActionButton(                       
+              : FloatingActionButton(
                 onPressed: _captureFrameWithDetection,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
                 child: const Icon(Icons.camera_alt),
-
               ),
-              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

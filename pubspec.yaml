@@ -34,7 +34,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  ultralytics_yolo: ^0.1.27
+  ultralytics_yolo: ^0.1.37
   image_picker: ^1.1.2
   lucide_icons: ^0.257.0
   hive: ^2.2.3
@@ -78,13 +78,16 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - android/app/src/main/assets/model_int8.tflite
+    - android/app/src/main/assets/nadam-best_int8.tflite
     - android/app/src/main/assets/noimage.png
     - android/app/src/main/assets/logo.png
     - android/app/src/main/assets/intro1.svg
     - android/app/src/main/assets/intro2.svg
     - android/app/src/main/assets/intro3.svg
     - android/app/src/main/assets/intro4.svg
+    - android/app/src/main/assets/guide1.jpg
+    - android/app/src/main/assets/guide2.jpg
+    - android/app/src/main/assets/guide3.jpg
     - android/app/src/main/assets/images/
   #   - images/a_dot_ham.jpeg
 

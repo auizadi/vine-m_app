@@ -53,10 +53,10 @@ class GuideScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-        
+
             // step 1
             stepTitle(1, 'Ambil foto secara jelas'),
-            stepImage(),
+            stepImageHorizontal('android/app/src/main/assets/guide1.jpg'),
             stepBulletList([
               'Pastikan pencahayaan baik',
               'Pastikan fokus pada daun',
@@ -65,7 +65,7 @@ class GuideScreen extends StatelessWidget {
 
             // step 2
             stepTitle(2, 'Upload gambar'),
-            stepImage(),
+            stepImageHorizontal('android/app/src/main/assets/guide2.jpg'),
             stepBulletList([
               'Pastikan pencahayaan baik',
               'Pastikan resolusi gambar baik',
@@ -73,6 +73,7 @@ class GuideScreen extends StatelessWidget {
 
             // step 3
             stepTitle(3, 'Hasil Deteksi'),
+            stepImageHorizontal('android/app/src/main/assets/guide3.jpg'),
             const SizedBox(height: 12),
             stepIconLabel(LucideIcons.wheatOff, 'Identifikasi Penyakit'),
             stepIconLabel(LucideIcons.crosshair, 'Akurasi'),
@@ -122,16 +123,35 @@ class GuideScreen extends StatelessWidget {
     );
   }
 
-  Widget stepImage() {
+  Widget stepImageHorizontal(String imagePath) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
-      height: 100,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Color(0xff7864f6),
-        borderRadius: BorderRadius.circular(12),
+      child: AspectRatio(
+        aspectRatio: 16 / 9, // Rasio lebar:tinggi (bisa disesuaikan)
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: const Color(0xff7864f6),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.photo, color: Colors.white, size: 32),
+                    SizedBox(height: 8),
+                    Text(
+                      'Gambar',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
-      child: const Icon(Icons.image, color: Colors.white, size: 48),
     );
   }
 

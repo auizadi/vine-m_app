@@ -950,10 +950,10 @@ packages:
     dependency: "direct main"
     description:
       name: ultralytics_yolo
-      sha256: f1f754b44ec7d74ec0dded1d268e5d606413fa120503cea401c9081110c39492
+      sha256: "95bcaff5f47542ae3e69db6f6522033e1270ccfd38e07996abdfc992af5bc549"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.27"
+    version: "0.1.37"
   vector_graphics:
     dependency: transitive
     description:

@@ -92,6 +92,7 @@ class DetailPenyakitCard extends StatelessWidget {
       appBar: AppBar(
         title: Text(nama, style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xff7864f6),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

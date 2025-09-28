@@ -2,10 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/main.dart';
-// import 'package:yolo_grapevine/services/camera_inference_screen.dart';
-// import 'package:yolo_grapevine/services/single_image_screen.dart';
 
 class DetectionDetailScreen extends StatefulWidget {
   final String? imagePath;
@@ -42,7 +41,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
   }
 
   Map<String, Map<String, dynamic>> _getDiseaseDetails(String className) {
-    // final diseaseData = _getDiseaseDetails(className);
     switch (className) {
       case 'Healthy':
         return {
@@ -57,7 +55,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Jaga kebersihan kebun',
               'Berikan pupuk secara teratur',
             ],
-
             'icon': Icons.thumb_up,
           },
         };
@@ -73,7 +70,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Bintik-bintik kuning berbentuk lingkaran',
               'Bagian daun muncul bintik-bintik putih berupa jamur',
             ],
-
             'icon': Icons.visibility,
           },
           'Dampak': {
@@ -81,7 +77,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Daun yang terinfeksi parah berubah menjadi coklat dan gugur sebelum waktunya',
               'Jamur yang menginfeksi sampai ke buah akan menyebabkan busuk',
             ],
-
             'icon': Icons.pest_control,
           },
           'Pencegahan': {
@@ -91,7 +86,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Drainase yang baik mencegah air menggenang terlalu lama',
               'Pemilihan varietas yang bagus',
             ],
-
             'icon': Icons.shield,
           },
           'Penanganan': {
@@ -99,7 +93,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Memotong daun yang terinfeksi',
               'Pemberian campuran Bordeaux yang terdiri dari tembaga sulfat dan kapur yang dilarutkan dengan air',
             ],
-
             'icon': Icons.medical_services,
           },
         };
@@ -114,7 +107,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Terdapat bintik-bintik bulat hingga poligonal berwarna coklat kemerahan dengan tepi gelap',
               'Banyak bercak yang terisolasi atau menyatu dapat terbentuk dipermukaan daun',
             ],
-
             'icon': Icons.visibility,
           },
           'Dampak': {
@@ -126,9 +118,8 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
           'Pencegahan': {
             'content': [
               'Membuat sirkulasi udara yang baik pada lahan',
-              'Perawatan tanaman lain disekitar lahan anggur agar tidak terinfekis penyakit dari tanaman lain',
+              'Perawatan tanaman lain disekitar lahan anggur agar tidak terinfeksi penyakit dari tanaman lain',
             ],
-
             'icon': Icons.shield,
           },
           'Penanganan': {
@@ -136,7 +127,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Memotong dan menghancurkan daun yang terinfeksi',
               'Pengaplikasian fungisida berupa campuran Bordeaux',
             ],
-
             'icon': Icons.medical_services,
           },
         };
@@ -150,14 +140,12 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
             'content': [
               'Daun berubah pucat dan kemudian menguning/memerah secara tidak teratur diantara urat daun dan kadang ditepi daun lama kelamaan daun akan mengering',
             ],
-
             'icon': Icons.visibility,
           },
           'Dampak': {
             'content': [
               'Buah dapat membusuk yang ditandai dengan bintik-bintik biru kehitaman yang disebut campak (measles)',
             ],
-
             'icon': Icons.pest_control,
           },
           'Pencegahan': {
@@ -170,7 +158,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
             'content': [
               'Pengaplikasian fungisida Benomyl, Prochloraz, Carbendazim + Flusilazole, dan Cyprodinil + Fludioxonil',
             ],
-
             'icon': Icons.medical_services,
           },
         };
@@ -185,7 +172,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Daun yang terinfeksi akan membentuk lesi bersudut berwarna merah kecoklatan',
               'Sebagian daun berwarna kuning biasanya terjadi saat kelembapan tinggi',
             ],
-
             'icon': Icons.visibility,
           },
           'Dampak': {
@@ -200,7 +186,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Memantau kehigienisan pengunjung yang masuk ke kebun',
               'Memilih pemasok bibit yang bereputasi baik sehingga bibit dapat terjamin kesehatannya',
             ],
-
             'icon': Icons.shield,
           },
           'Penanganan': {
@@ -211,7 +196,6 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               'Pengaplikasian fungisida Captan',
               'Pengaplikasian fungisida Ziram',
             ],
-
             'icon': Icons.medical_services,
           },
         };
@@ -229,188 +213,249 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
   }
 
   Future<void> _saveResult() async {
-    final result = DetectionHistory(
-      className: widget.className,
-      confidence: widget.confidence,
-      imagePath: widget.imagePath ?? '',
-      detectionTime: DateTime.now(),
-      isSaved: true,
-    );
-    // cek apakah sudah ada hasil deteksi dengan path dan waktu mirip
-    final alreadySaved = detectionBox.values.any(
-      (item) =>
-          item.imagePath == (widget.imagePath ?? '') &&
-          item.className == widget.className &&
-          item.confidence == widget.confidence,
-    );
+    if (widget.imagePath != null && File(widget.imagePath!).existsSync()) {
+      final permanentDirectory = await getApplicationDocumentsDirectory();
+      final timeStamp = DateTime.now().millisecondsSinceEpoch;
+      final permanentImagePath =
+          '${permanentDirectory.path}/saved_$timeStamp.jpg';
 
-    if (alreadySaved) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hasil deteksi sudah tersimpan'),
-          duration: Duration(seconds: 1),
-        ),
+      // Copy file dari temporary ke permanent location
+      await File(widget.imagePath!).copy(permanentImagePath);
+
+      final result = DetectionHistory(
+        className: widget.className,
+        confidence: widget.confidence,
+        imagePath: permanentImagePath, // Gunakan path yang permanen
+        detectionTime: DateTime.now(),
+        isSaved: true,
       );
-      // return;
+
+      // Cek apakah sudah ada hasil deteksi yang sama (dengan toleransi waktu 5 menit)
+      final alreadySaved = detectionBox.values.any(
+        (item) =>
+            item.className == widget.className &&
+            item.confidence == widget.confidence &&
+            (item.detectionTime.difference(DateTime.now()).inMinutes.abs() < 5),
+      );
+
+      if (alreadySaved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hasil deteksi sudah tersimpan'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        await detectionBox.add(result);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hasil deteksi berhasil disimpan'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
+      // Hapus file temporary setelah disimpan
+      try {
+        await File(widget.imagePath!).delete();
+      } catch (e) {
+        print("Gagal menghapus file temporary: $e");
+      }
+
+      if (!mounted) return;
+      setState(() => isSaved = true);
+
+      // Tunggu sebentar sebelum navigasi
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 1)),
+        (route) => false,
+      );
     } else {
-      await detectionBox.add(result);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Hasil deteksi berhasil disimpan'),
+          content: Text("Gambar tidak ditemukan"),
           duration: Duration(seconds: 1),
         ),
       );
     }
+  }
 
-    // if (!mounted) return;
+  // Method untuk menangani back button
+  Future<bool> _onWillPop() async {
+    if (widget.fromCamera && !widget.isFromHistory && !isSaved) {
+      // Hapus file temporary jika user tidak menyimpan
+      if (widget.imagePath != null && File(widget.imagePath!).existsSync()) {
+        try {
+          await File(widget.imagePath!).delete();
+          print('File temporary dihapus: ${widget.imagePath}');
+        } catch (e) {
+          print('Gagal menghapus file temporary: $e');
+        }
+      }
+    }
+    return true;
+  }
 
-    // setState(() => isSaved = true);
+  Future<void> _handleBackButton() async {
+    if (widget.fromCamera && !widget.isFromHistory && !isSaved) {
+      // Hapus file temporary jika kembali tanpa menyimpan
+      if (widget.imagePath != null && File(widget.imagePath!).existsSync()) {
+        try {
+          await File(widget.imagePath!).delete();
+        } catch (e) {
+          print('Gagal menghapus file temporary: $e');
+        }
+      }
+    }
 
-    // await Future.delayed(const Duration(seconds: 1));
-    if (!mounted) return;
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 1)),
-      (route) => false,
-    );
+    if (widget.fromCamera) {
+      Navigator.pop(context);
+    } else if (widget.isFromHistory) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 1)),
+        (route) => false,
+      );
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final diseaseDetails = _getDiseaseDetails(widget.className);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Detail Deteksi',
-          style: TextStyle(color: Colors.white),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Detail Deteksi',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: const Color(0xff7864f6),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: _handleBackButton,
+          ),
         ),
-        backgroundColor: Color(0xff7864f6),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (widget.fromCamera) {
-              Navigator.pop(context);
-            } else if (widget.isFromHistory) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const MainScreen(initialIndex: 1),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Gambar
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child:
+                      widget.imageData != null
+                          ? Image.memory(
+                            widget.imageData!,
+                            width: 300,
+                            height: 300,
+                            fit: BoxFit.cover,
+                          )
+                          : (widget.imagePath != null &&
+                              widget.imagePath!.isNotEmpty &&
+                              File(widget.imagePath!).existsSync())
+                          ? Image.file(
+                            File(widget.imagePath!),
+                            width: 300,
+                            height: 300,
+                            fit: BoxFit.cover,
+                          )
+                          : const Icon(
+                            Icons.eco,
+                            size: 100,
+                            color: Colors.grey,
+                          ),
                 ),
-                (route) => false,
-              );
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
-      ),
-      
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // gambar
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(16),
-                child:
-                    widget.imageData != null
-                        ? Image.memory(
-                          widget.imageData!,
-                        ) // Tampilkan dari memory jika ada
-                        : (widget.imagePath != null &&
-                            widget.imagePath!.isNotEmpty &&
-                            File(widget.imagePath!).existsSync())
-                        ? Image.file(
-                          File(widget.imagePath!),
-                        ) // Fallback ke file
-                        : const Icon(Icons.eco, size: 100, color: Colors.grey),
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildSection(
-              title: 'Hasil Deteksi',
-              children: [
-                _buildInfoRow('Penyakit', widget.className),
-                _buildInfoRow(
-                  'Akurasi',
-                  '${(widget.confidence * 100).toStringAsFixed(1)}%',
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-            // Detail Penyakit
-            Column(
-              children: [
-                for (var entry in diseaseDetails.entries)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            entry.value['icon'],
-                            size: 20,
-                            color: Color(0xff7864f6),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            entry.key,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff7864f6),
+              _buildSection(
+                title: 'Hasil Deteksi',
+                children: [
+                  _buildInfoRow('Penyakit', widget.className),
+                  _buildInfoRow(
+                    'Akurasi',
+                    '${(widget.confidence * 100).toStringAsFixed(1)}%',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Detail Penyakit
+              Column(
+                children: [
+                  for (var entry in diseaseDetails.entries)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              entry.value['icon'],
+                              size: 20,
+                              color: const Color(0xff7864f6),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      _buildNumberedList(
-                        List<String>.from(entry.value['content']),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-              ],
-            ),
-          ],
+                            const SizedBox(width: 8),
+                            Text(
+                              entry.key,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff7864f6),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        _buildNumberedList(
+                          List<String>.from(entry.value['content']),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar:
-          (!widget.isFromHistory && widget.className.isNotEmpty)
-              ? SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await _saveResult();
-                      if(mounted) setState(() => isSaved = true );
-                    },
-                        
-                    icon: const Icon(Icons.save, color: Colors.white),
-                    label: const Text(
-                      'Simpan Hasil',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: isSaved ? Colors.grey : Color(0xff7864f6),
+        bottomNavigationBar:
+            (!widget.isFromHistory && widget.className.isNotEmpty)
+                ? SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: ElevatedButton.icon(
+                      onPressed: isSaved ? null : _saveResult,
+                      icon: const Icon(Icons.save, color: Colors.white),
+                      label: const Text(
+                        'Simpan Hasil',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                        backgroundColor:
+                            isSaved ? Colors.grey : const Color(0xff7864f6),
+                      ),
                     ),
                   ),
-                ),
-              )
-              : null,
+                )
+                : null,
+      ),
     );
   }
 
   Widget _buildSection({
     required String title,
     IconData? icon,
-    Color iconColor =const Color(0xff7864f6),
+    Color iconColor = const Color(0xff7864f6),
     required List<Widget> children,
   }) {
     return Column(
@@ -467,7 +512,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: Color(0xff7864f6),
+                  backgroundColor: const Color(0xff7864f6),
                   radius: 10,
                   child: Text(
                     '${i + 1}',
