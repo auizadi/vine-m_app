@@ -69,7 +69,7 @@ class HistoryScreen extends StatelessWidget {
                         'Akurasi: ${((result?.confidence ?? 0.0) * 100).toStringAsFixed(1)}%',
                       ),
                       Text(
-                        'Tanggal: ${result?.detectionTime.toString().substring(0, 16)}',
+                        'Waktu: ${result?.detectionTime.toString().substring(0, 16)}',
                       ),
                     ],
                   ),

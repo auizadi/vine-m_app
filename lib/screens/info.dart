@@ -21,7 +21,7 @@ class InfoScreen extends StatelessWidget {
           children: [
             sectionTitle('📌 Tentang Aplikasi'),
             sectionText(
-              '''VineCare adalah aplikasi cerdas berbasis kecerdasan buatan untuk mendeteksi penyakit daun tanaman anggur secara otomatos. Aplikasi ini membantu petani dan penggiat tanaman menjaga kualitas tanaman mereka secara cepat dan efisien.''',
+              '''VineCare adalah aplikasi cerdas berbasis kecerdasan buatan untuk mendeteksi penyakit daun tanaman anggur secara otomatis. Aplikasi ini membantu petani dan penggiat tanaman menjaga kualitas tanaman mereka secara cepat dan efisien.''',
             ),
             const SizedBox(height: 16),
             sectionTitle('🌿 Jenis Penyakit yang Dideteksi'),
@@ -37,7 +37,7 @@ class InfoScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
             sectionTitle('📞 Kontak & Bantuan'),
-            _buildNumberedList(['Email: dani@mail.com', 'Hubungi kami untuk saran, masukan, atau bantuan teknis']),
+            _buildNumberedList(['Email: auizaldi.21026@mhs.unesa.ac.id', 'Hubungi kami untuk saran, masukan, atau bantuan teknis']),
 
           ],
         ),

@@ -91,11 +91,11 @@ class GuideScreen extends StatelessWidget {
             ),
             stepIconText(
               Icons.pan_tool_outlined,
-              'Tahan perangkat kamu tetap stabil',
+              'Tahan perangkat kamu tetap stabil sampai kotak deteksi muncul',
             ),
             stepIconText(
               Icons.watch_later_outlined,
-              'Pemantauan berkala mengatasi penyakit menyebar',
+              'Jika deteksi real-time tidak berjalan dengan baik, coba kembali kemudian pilih menu real-time lagi',
             ),
           ],
         ),

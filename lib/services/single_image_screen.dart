@@ -27,9 +27,11 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
 
   Future<void> loadYOLO() async {
     setState(() => isLoading = true);
-    yolo = YOLO(modelPath: 'nadam-best_int8', 
-    useGpu: false,
-    task: YOLOTask.detect);
+    yolo = YOLO(
+      modelPath: 'nadam2-best_int8',
+      useGpu: false,
+      task: YOLOTask.detect,
+    );
     await yolo!.loadModel();
     setState(() => isLoading = false);
   }
@@ -57,15 +59,38 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
     }
   }
 
+  String formatClassName(String className) {
+    final specialCases = {
+      'Downey_mildew': 'Downy Mildew',
+      'Leaf_blight': 'Leaf Blight',
+      'Black_rot': 'Black Rot',
+      'Esca': 'Esca',
+      'Healthy': 'Daun Sehat',
+    };
+
+    return specialCases[className] ??
+        className
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map((word) {
+              if (word.isEmpty) return '';
+              return word[0].toUpperCase() + word.substring(1).toLowerCase();
+            })
+            .join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Deteksi Gambar Tunggal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+          title: Text(
+            'Deteksi Gambar Tunggal',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+          ),
           backgroundColor: Color(0xff7864f6),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white,),
+            icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -102,7 +127,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                         ),
               ),
             ),
-            
+
             // Detection results summary
             Container(
               padding: EdgeInsets.all(8),
@@ -124,7 +149,7 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                     child: ListTile(
                       leading: CircleAvatar(child: Text('${index + 1}')),
                       title: Text(
-                        detection['class'] ?? 'Unknown',
+                        formatClassName(detection['class'] ?? 'Unknown'),
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
@@ -132,14 +157,20 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                       ),
                       trailing: Icon(Icons.arrow_forward),
                       onTap: () {
-                        if (selectedImage != null){
-                          Navigator.push(context,
+                        if (selectedImage != null) {
+                          Navigator.push(
+                            context,
                             MaterialPageRoute(
-                              builder: (context) => DetectionDetailScreen(imagePath: selectedImage!.path,
-                               className: detection['class'] ?? 'Unknown', confidence: detection['confidence']?.toDouble() ?? 0.0,
-                              index: index
-                              ),
-                            )
+                              builder:
+                                  (context) => DetectionDetailScreen(
+                                    imagePath: selectedImage!.path,
+                                    className: detection['class'] ?? 'Unknown',
+                                    confidence:
+                                        detection['confidence']?.toDouble() ??
+                                        0.0,
+                                    index: index,
+                                  ),
+                            ),
                           );
                         }
                       },
@@ -161,7 +192,6 @@ class _SingleImageScreenState extends State<SingleImageScreen> {
                   padding: EdgeInsets.all(8),
                   child: Text('Upload Gambar dan Deteksi'),
                 ),
-                
               ),
             ),
           ],

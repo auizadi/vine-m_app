@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:yolo_grapevine/screens/splash_screen.dart';
-// import 'package:hive/hive.dart';
-// import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 import 'screens/home.dart';
 import 'screens/history.dart';
 import 'screens/guide.dart';
@@ -95,13 +93,13 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (bool didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result ) async {
         if (didPop) {
           return;
         }
         final NavigatorState navigator = Navigator.of(context);
-        final bool? shouldPop = await _onWillPop();
-        if (shouldPop ?? false) {
+        final bool shouldPop = await _onWillPop();
+        if (shouldPop) {
           navigator.pop();
         }
       },

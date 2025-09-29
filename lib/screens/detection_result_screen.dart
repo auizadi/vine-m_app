@@ -5,6 +5,27 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/main.dart';
+import 'package:yolo_grapevine/services/camera_inference_screen.dart';
+
+String formatClassName(String className) {
+  final specialCases = {
+    'Downey_mildew': 'Downy Mildew',
+    'Leaf_blight': 'Leaf Blight',
+    'Black_rot': 'Black Rot',
+    'Esca': 'Esca',
+    'Healthy': 'Daun Sehat',
+  };
+
+  return specialCases[className] ??
+      className
+          .replaceAll('_', ' ')
+          .split(' ')
+          .map((word) {
+            if (word.isEmpty) return '';
+            return word[0].toUpperCase() + word.substring(1).toLowerCase();
+          })
+          .join(' ');
+}
 
 class DetectionDetailScreen extends StatefulWidget {
   final String? imagePath;
@@ -33,7 +54,7 @@ class DetectionDetailScreen extends StatefulWidget {
 class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
   late final Box<DetectionHistory> detectionBox;
   bool isSaved = false;
-
+  String get formatedClassName => formatClassName(widget.className);
   @override
   void initState() {
     super.initState();
@@ -259,7 +280,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
       try {
         await File(widget.imagePath!).delete();
       } catch (e) {
-        print("Gagal menghapus file temporary: $e");
+        debugPrint("Gagal menghapus file temporary: $e");
       }
 
       if (!mounted) return;
@@ -291,9 +312,9 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
       if (widget.imagePath != null && File(widget.imagePath!).existsSync()) {
         try {
           await File(widget.imagePath!).delete();
-          print('File temporary dihapus: ${widget.imagePath}');
+          debugPrint('File temporary dihapus: ${widget.imagePath}');
         } catch (e) {
-          print('Gagal menghapus file temporary: $e');
+          debugPrint('Gagal menghapus file temporary: $e');
         }
       }
     }
@@ -307,13 +328,19 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
         try {
           await File(widget.imagePath!).delete();
         } catch (e) {
-          print('Gagal menghapus file temporary: $e');
+          debugPrint('Gagal menghapus file temporary: $e');
         }
       }
     }
 
+    if (!mounted) return;
+
     if (widget.fromCamera) {
-      Navigator.pop(context);
+      // Kembali ke Camera Detection Screen menggunakan pushReplacement
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const CameraDetectionScreen()),
+      );
     } else if (widget.isFromHistory) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -381,7 +408,7 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
               _buildSection(
                 title: 'Hasil Deteksi',
                 children: [
-                  _buildInfoRow('Penyakit', widget.className),
+                  _buildInfoRow('Penyakit', formatedClassName),
                   _buildInfoRow(
                     'Akurasi',
                     '${(widget.confidence * 100).toStringAsFixed(1)}%',

@@ -1,12 +1,9 @@
-// import 'package:ultralytics_yolo/yolo_view.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
-import 'package:yolo_grapevine/models/diseases_model.dart';
+import 'package:yolo_grapevine/main.dart';
 import 'package:yolo_grapevine/optimization/device_specific_opt.dart';
-// import 'dart:developer' as developer;
 import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 
 // For even better practice:
@@ -119,14 +116,21 @@ class _CameraDetectionScreenState extends State<CameraDetectionScreen> {
         backgroundColor: Color(0xff7864f6),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Kembali ke Home Screen (MainScreen)
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const MainScreen()),
+              (route) => route.isFirst, // Hanya hapus sampai root
+            );
+          },
         ),
       ),
       body: Stack(
         children: [
           // Camera view with YOLO processing
           YOLOView(
-            modelPath: 'nadam-best_int8',
+            modelPath: 'nadam2-best_int8',
             useGpu: false,
             task: YOLOTask.detect,
             controller: controller,
