@@ -8,6 +8,7 @@ class GuideScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Row(
           children: const [
             Icon(Icons.menu_book, color: Colors.white),

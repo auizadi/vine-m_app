@@ -6,6 +6,8 @@ import 'screens/guide.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/diseases_model.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,32 +70,38 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<bool> _onWillPop() async {
-    return await showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('Konfirmasi'),
-                content: const Text('Apakah anda yakin keluar aplikasi?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Tidak'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Ya'),
-                  ),
-                ],
+    final bool? result = await showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Konfirmasi'),
+            content: const Text('Apakah anda yakin keluar aplikasi?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Tidak'),
               ),
-        ) ??
-        false;
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Ya'),
+              ),
+            ],
+          ),
+    );
+
+    if (result == true) {
+      // Keluar aplikasi sepenuhnya
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      return true;
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result ) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
           return;
         }
