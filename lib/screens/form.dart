@@ -43,31 +43,32 @@ class _FormScreenState extends State<FormScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // 1. Simpan gambar ke direktori permanen
       final appDir = await getApplicationDocumentsDirectory();
       final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final savedImage = await File(
         _selectedImagePath!,
       ).copy('${appDir.path}/$fileName');
 
-      // 2. Simpan data ke Hive tanpa model
       final profileBox = await Hive.openBox('userProfile');
       await profileBox.putAll({
         'nama': _nameController.text,
         'imagePath': savedImage.path,
         'lastUpdated': DateTime.now().toString(),
       });
-      // 3. tandai profil sudah lengkap disettings box
+
       final settingsBox = Hive.box('settings');
       await settingsBox.put('profile_completed', true);
+      await settingsBox.flush();
 
-      // 4. Tampilkan feedback
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Profil berhasil disimpan')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profil berhasil disimpan!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
 
-      // 5. navigasi ke HomeScreen
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),

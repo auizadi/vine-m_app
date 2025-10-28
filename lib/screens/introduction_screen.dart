@@ -94,7 +94,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             safeArea: 100,
           ),
           footer: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              final settingsBox = Hive.box('settings');
+              await settingsBox.put('onboarding_seen', true);
+              await settingsBox.flush();
+
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const FormScreen()),
@@ -107,7 +111,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Mulai',
               style: TextStyle(
                 color: Color(0xff7864f6),
@@ -130,7 +134,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
       ),
       next: const Icon(Icons.arrow_forward, color: Colors.white),
-      
+
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
       controlsPadding:
