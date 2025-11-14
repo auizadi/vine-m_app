@@ -1,8 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-// import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:yolo_grapevine/models/diseases_model.dart';
 import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 
@@ -60,7 +59,7 @@ class HistoryScreen extends StatelessWidget {
                           )
                           : const Icon(Icons.photo, size: 50),
                   title: Text(
-                    result?.className ?? 'Unknown',
+                    formatClassName(result?.className ?? 'Unknown'),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
@@ -69,14 +68,13 @@ class HistoryScreen extends StatelessWidget {
                       Text(
                         'Akurasi: ${((result?.confidence ?? 0.0) * 100).toStringAsFixed(1)}%',
                       ),
-                      Text(
-                        'Waktu: ${result?.detectionTime.toString().substring(0, 16)}',
-                      ),
+                      Text('Waktu: ${_formatDate(result?.detectionTime)}'),
                     ],
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteResult(context, box, index),
+                    onPressed:
+                        () => _showDeleteConfirmation(context, box, index),
                   ),
                   onTap: () {
                     Navigator.push(
@@ -102,6 +100,12 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
+  String _formatDate(DateTime? dateTime) {
+    if (dateTime == null) return 'Unknown Date';
+    final formatter = DateFormat('dd MMMM yyyy HH:mm');
+    return formatter.format(dateTime);
+  }
+
   Future<void> _deleteResult(
     BuildContext context,
     Box<DetectionHistory> box,
@@ -117,8 +121,6 @@ class HistoryScreen extends StatelessWidget {
 
     try {
       await box.deleteAt(index);
-
-      // Check if widget is still mounted before using context
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -134,5 +136,45 @@ class HistoryScreen extends StatelessWidget {
         context,
       ).showSnackBar(const SnackBar(content: Text('Gagal menghapus riwayat')));
     }
+  }
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    Box<DetectionHistory> box,
+    int index,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text(
+            'Konfirmasi Hapus',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text('Apakah Anda yakin ingin menghapus riwayat ini?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Tutup dialog
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await Future.delayed(const Duration(milliseconds: 300));
+                if (context.mounted) {
+                  await _deleteResult(context, box, index);
+                }
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -30,4 +30,24 @@ class DetectionHistory {
     this.isSaved = false,
     this.isFirstLaunch = true, 
   });
+
+  String formatClassName(String className) {
+    final specialCases = {
+      'Downey_mildew': 'Downy Mildew',
+      'Leaf_blight': 'Leaf Blight',
+      'Black_rot': 'Black Rot',
+      'Esca': 'Esca',
+      'Healthy': 'Daun Sehat',
+    };
+
+    return specialCases[className] ??
+        className
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map((word) {
+              if (word.isEmpty) return '';
+              return word[0].toUpperCase() + word.substring(1).toLowerCase();
+            })
+            .join(' ');
+  }
 }
