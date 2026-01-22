@@ -16,6 +16,12 @@ void main() async {
   // box untuk menyimpan hasil deteksi
   Hive.registerAdapter(DetectionHistoryAdapter());
   await Hive.openBox<DetectionHistory>('detectionResults');
+  /// 'detectionResults' to store instances of the `DetectionHistory` class. This line of code is
+  /// setting up a local database storage using Hive, specifically opening a box where you can store and
+  /// retrieve instances of the `DetectionHistory` class. This allows you to persistently store
+  /// detection results in the 'detectionResults' box for future retrieval and usage within the
+  /// application.
+  await Hive.openBox<DetectionHistory>('detectionResults');
 
   // box untuk menyimpan flag onboarding
   await Hive.openBox('settings');

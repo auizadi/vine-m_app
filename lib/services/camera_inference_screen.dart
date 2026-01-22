@@ -6,7 +6,6 @@ import 'package:yolo_grapevine/main.dart';
 import 'package:yolo_grapevine/optimization/device_specific_opt.dart';
 import 'package:yolo_grapevine/screens/detection_result_screen.dart';
 
-// For even better practice:
 class CameraDetectionScreen extends StatefulWidget {
   const CameraDetectionScreen({super.key});
 

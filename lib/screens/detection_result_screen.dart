@@ -551,6 +551,9 @@ class _DetectionDetailScreenState extends State<DetectionDetailScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
+                /// The above Dart code is creating a Text widget with the text content taken from the
+                /// `items` list at index `i`. The text is styled with a font size of 14 and aligned to
+                /// justify within the Expanded widget.
                 Expanded(
                   child: Text(
                     items[i],
